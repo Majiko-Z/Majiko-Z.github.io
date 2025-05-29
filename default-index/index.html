@@ -137,18 +137,18 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">3</span>
+          <span class="site-state-item-count">4</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
           <a href="/categories/">
-        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-count">3</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-count">4</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -165,6 +165,141 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2025/05/29/%E4%B8%80%E4%B8%AAhttp%E5%8E%8B%E6%B5%8B%E5%B7%A5%E5%85%B7/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="yaohui">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+      <meta itemprop="description" content="just a blog">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Hexo">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2025/05/29/%E4%B8%80%E4%B8%AAhttp%E5%8E%8B%E6%B5%8B%E5%B7%A5%E5%85%B7/" class="post-title-link" itemprop="url">一个http压测工具</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2025-05-29 23:09:39" itemprop="dateCreated datePublished" datetime="2025-05-29T23:09:39+08:00">2025-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2025-05-30 00:29:18" itemprop="dateModified" datetime="2025-05-30T00:29:18+08:00">2025-05-30</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E4%B8%AA%E4%BA%BA%E9%A1%B9%E7%9B%AE/" itemprop="url" rel="index"><span itemprop="name">个人项目</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>有时候会遇到一些特殊的http压测场景，要求每条http请求均不同。例如批量创建一批订单等。创建时要求各个条目不相同。<br>调查时未发现有工具可以在批量请求时(事后发现Jmeter可以满足要求)，支持自定义http请求内容，一般都是对某个url进行批量请求。<br>例如apache bench的使用，是对某个网址进行压测。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">abs -n 100  -c 20  测试网址</span><br><span class="line"><span class="comment"># 发送100个请求，采用20个并发</span></span><br></pre></td></tr></table></figure>
+
+<p>因此自己使用rust开发一个适合这种场景的压测工具，方便使用。</p>
+<h2 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h2><p>根据自己理解，一般业务上有两种压测请求模式</p>
+<ol>
+<li>设置N个并发同时发送HTTP请求，我称之为process模式</li>
+<li>设置每秒发送N个HTTP请求，我称之为qps模式</li>
+</ol>
+<p>明确需要之后，实际开发起来代码是比较简单的，流程如下</p>
+<ol>
+<li>从指定文件中读取http请求内容,每条数据是一个http请求</li>
+<li>发送数据，可设置每秒发送多少条请求，或多少个并发量同时进行请求。</li>
+</ol>
+<h3 id="http请求文件定义"><a href="#http请求文件定义" class="headerlink" title="http请求文件定义"></a>http请求文件定义</h3><p>本人是将文件定义设置为json文件,方便通过脚本批量生成</p>
+<p>其中<code>query</code>是一个数组，每个元素是一个不同的http请求。每个元素包含<code>method</code>,<code>url</code>,<code>headers</code>,<code>body</code>属性。<br>程序读取文件并将其拼成http请求发送。</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;query&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">        <span class="punctuation">&#123;</span></span><br><span class="line">            <span class="attr">&quot;method&quot;</span><span class="punctuation">:</span> <span class="string">&quot;POST&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;url&quot;</span><span class="punctuation">:</span> <span class="string">&quot;http://0.0.0.0:9999/create_acc&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;headers&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">                <span class="punctuation">[</span></span><br><span class="line">                    <span class="string">&quot;Content-Type&quot;</span><span class="punctuation">,</span></span><br><span class="line">                    <span class="string">&quot;application/json&quot;</span></span><br><span class="line">                <span class="punctuation">]</span></span><br><span class="line">            <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;body&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&#123;\&quot;accountType\&quot;: \&quot;114\&quot;&#125;&quot;</span></span><br><span class="line">        <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="punctuation">&#123;</span></span><br><span class="line">            <span class="attr">&quot;method&quot;</span><span class="punctuation">:</span> <span class="string">&quot;POST&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;url&quot;</span><span class="punctuation">:</span> <span class="string">&quot;http://0.0.0.0:9999/create_acc&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;headers&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">                <span class="punctuation">[</span></span><br><span class="line">                    <span class="string">&quot;Content-Type&quot;</span><span class="punctuation">,</span></span><br><span class="line">                    <span class="string">&quot;application/json&quot;</span></span><br><span class="line">                <span class="punctuation">]</span></span><br><span class="line">            <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;body&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&#123;\&quot;accountType\&quot;: \&quot;514\&quot;&#125;&quot;</span></span><br><span class="line">        <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="process模式"><a href="#process模式" class="headerlink" title="process模式"></a>process模式</h3><p>process模式即设置N个进程同时发送HTTP请求，如果设置了总共发送<code>total</code>个请求, 则每个进程会发送<code>total/process_num</code>个请求;<br>需要保证 <code>total % process_num == 0</code></p>
+<p>实现很简单，创建N个进程发送即可。</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">pub</span> <span class="keyword">async</span> <span class="keyword">fn</span> <span class="title function_">multi_process_request</span>() <span class="punctuation">-&gt;</span> (<span class="type">Vec</span>&lt;<span class="type">u64</span>&gt;, <span class="type">u64</span>) &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">process_num</span> = *PROCESS_NUM.<span class="title function_ invoke__">get</span>().<span class="title function_ invoke__">expect</span>(<span class="string">&quot;PROCESS_NUM is not set&quot;</span>);</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">total_num</span> = *TOTAL_HTTP_NUM.<span class="title function_ invoke__">get</span>().<span class="title function_ invoke__">expect</span>(<span class="string">&quot;TOTAL_HTTP_NUM is not set&quot;</span>);</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">send_segment</span> = total_num / process_num;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">expire_secs</span> = *EXPIRE_TIME_SEC.<span class="title function_ invoke__">get</span>().<span class="title function_ invoke__">expect</span>(<span class="string">&quot;EXPIRE_TIME_SEC is not set&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> <span class="variable">client</span> = ClientBuilder::<span class="title function_ invoke__">new</span>()</span><br><span class="line">        .<span class="title function_ invoke__">http2_adaptive_window</span>(<span class="literal">true</span>) <span class="comment">// Enable adaptive window for HTTP/2</span></span><br><span class="line">        .<span class="title function_ invoke__">pool_max_idle_per_host</span>(<span class="number">500</span>) <span class="comment">// Allow up to 500 idle connections per host</span></span><br><span class="line">        .<span class="title function_ invoke__">timeout</span>(Duration::<span class="title function_ invoke__">from_secs</span>(expire_secs <span class="keyword">as</span> <span class="type">u64</span>)) <span class="comment">// 连接超时时间</span></span><br><span class="line">        .<span class="title function_ invoke__">build</span>()</span><br><span class="line">        .<span class="title function_ invoke__">expect</span>(<span class="string">&quot;Failed to build client&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">handles</span> = <span class="built_in">vec!</span>[];</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> <span class="variable">success_cost</span> = Arc::<span class="title function_ invoke__">new</span>(Mutex::<span class="title function_ invoke__">new</span>(<span class="type">Vec</span>::<span class="title function_ invoke__">new</span>()));</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">failed_cnt</span> = Arc::<span class="title function_ invoke__">new</span>(Mutex::<span class="title function_ invoke__">new</span>(<span class="number">0</span>));</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> <span class="variable">i</span> <span class="keyword">in</span> <span class="number">0</span>..process_num &#123;</span><br><span class="line">        <span class="keyword">let</span> <span class="variable">client_clone</span> = client.<span class="title function_ invoke__">clone</span>();</span><br><span class="line">        <span class="keyword">let</span> <span class="variable">begin_idx</span> = i * send_segment;</span><br><span class="line">        <span class="keyword">let</span> <span class="variable">end_idx</span> = (i + <span class="number">1</span>) * send_segment;</span><br><span class="line">        <span class="keyword">let</span> <span class="variable">success_cost_clone</span> = Arc::<span class="title function_ invoke__">clone</span>(&amp;success_cost);</span><br><span class="line">        <span class="keyword">let</span> <span class="variable">failed_cnt_clone</span> = Arc::<span class="title function_ invoke__">clone</span>(&amp;failed_cnt);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">let</span> <span class="variable">handler</span> = tokio::<span class="title function_ invoke__">spawn</span>(<span class="keyword">async</span> <span class="keyword">move</span> &#123;</span><br><span class="line">            <span class="keyword">for</span> <span class="variable">j</span> <span class="keyword">in</span> begin_idx..end_idx &#123;</span><br><span class="line">                <span class="keyword">let</span> <span class="variable">begin_timestamp</span> = chrono::Utc::<span class="title function_ invoke__">now</span>().<span class="title function_ invoke__">timestamp_millis</span>() <span class="keyword">as</span> <span class="type">u64</span>;</span><br><span class="line">                <span class="keyword">match</span> HTTP_QUERY.query[j <span class="keyword">as</span> <span class="type">usize</span>].<span class="title function_ invoke__">send_request</span>(<span class="title function_ invoke__">Some</span>(&amp;client_clone)).<span class="keyword">await</span> &#123;</span><br><span class="line">                    <span class="title function_ invoke__">Ok</span>(_) =&gt; &#123;</span><br><span class="line">                        <span class="keyword">let</span> <span class="variable">end_timestamp</span> = chrono::Utc::<span class="title function_ invoke__">now</span>().<span class="title function_ invoke__">timestamp_millis</span>() <span class="keyword">as</span> <span class="type">u64</span>;</span><br><span class="line">                        <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">success_cost</span> = success_cost_clone.<span class="title function_ invoke__">lock</span>().<span class="title function_ invoke__">unwrap</span>();</span><br><span class="line">                        success_cost.<span class="title function_ invoke__">push</span>(end_timestamp - begin_timestamp);</span><br><span class="line">                        info!(<span class="string">&quot;OK. Response Cost: &#123;&#125; ms&quot;</span>, end_timestamp - begin_timestamp);</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="title function_ invoke__">Err</span>(e) =&gt; &#123;</span><br><span class="line">                        <span class="keyword">let</span> <span class="variable">end_timestamp</span> = chrono::Utc::<span class="title function_ invoke__">now</span>().<span class="title function_ invoke__">timestamp_millis</span>() <span class="keyword">as</span> <span class="type">u64</span>;</span><br><span class="line">                        <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">failed_cnt</span> = failed_cnt_clone.<span class="title function_ invoke__">lock</span>().<span class="title function_ invoke__">unwrap</span>();</span><br><span class="line">                        *failed_cnt += <span class="number">1</span>;</span><br><span class="line">                        error!(<span class="string">&quot;Error sending request: &#123;&#125;. Cost: &#123;&#125; ms&quot;</span>, e, end_timestamp - begin_timestamp);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">        handles.<span class="title function_ invoke__">push</span>(handler);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> <span class="variable">handler</span> <span class="keyword">in</span> handles &#123;</span><br><span class="line">        <span class="keyword">match</span> handler.<span class="keyword">await</span> &#123;</span><br><span class="line">            <span class="title function_ invoke__">Ok</span>(_) =&gt; &#123;&#125;</span><br><span class="line">            <span class="title function_ invoke__">Err</span>(e) =&gt; &#123;</span><br><span class="line">                error!(<span class="string">&quot;Task failed: &#123;:?&#125;&quot;</span>, e);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> <span class="variable">success_cost</span> = success_cost.<span class="title function_ invoke__">lock</span>().<span class="title function_ invoke__">unwrap</span>().<span class="title function_ invoke__">clone</span>();</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">failed_cnt</span> = failed_cnt.<span class="title function_ invoke__">lock</span>().<span class="title function_ invoke__">unwrap</span>().<span class="title function_ invoke__">clone</span>();</span><br><span class="line">    (success_cost, failed_cnt)</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="qps模式"><a href="#qps模式" class="headerlink" title="qps模式"></a>qps模式</h3><p>qps模式即设置每秒发送qps次HTTP请求，如果是qps模式, 进程会持续<code>total</code>次发送, 每次发送后sleep <code>1/qps</code>秒。</p>
+<p>在这种模式经常出现对端未及时相应，本端就断开http链接的情况，因此新增<code>expire_secs</code>设置每个http请求的超时时间。</p>
+<p>实现如下:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line">pub async fn send_request_by_qps(qps: u64) -&gt; (Vec&lt;u64&gt;, u64) &#123;</span><br><span class="line">    // Build a client with customized settings</span><br><span class="line">    <span class="built_in">let</span> expire_secs = EXPIRE_TIME_SEC.get().unwrap();</span><br><span class="line"></span><br><span class="line">    <span class="built_in">let</span> client = ClientBuilder::new()</span><br><span class="line">        .http2_adaptive_window(<span class="literal">true</span>) // Enable adaptive window <span class="keyword">for</span> HTTP/2</span><br><span class="line">        .pool_max_idle_per_host(500) // Allow up to 500 idle connections per host</span><br><span class="line">        .<span class="built_in">timeout</span>(Duration::from_secs(*expire_secs as u64)) // 连接超时时间</span><br><span class="line">        .build()</span><br><span class="line">        .expect(<span class="string">&quot;Failed to build client&quot;</span>); // [SAFE]</span><br><span class="line"></span><br><span class="line">    <span class="built_in">let</span> interval_duration = Duration::from_secs_f64(1.0 / qps as f64);</span><br><span class="line">    <span class="built_in">let</span> mut interval = interval(interval_duration); // qps interval</span><br><span class="line"></span><br><span class="line">    <span class="built_in">let</span> success_cost = Arc::new(Mutex::new(Vec::new()));</span><br><span class="line">    <span class="built_in">let</span> failed_cnt = Arc::new(Mutex::new(0));</span><br><span class="line"></span><br><span class="line">    <span class="built_in">let</span> total_query = *TOTAL_HTTP_NUM.get().unwrap() as usize;</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> 0..std::cmp::min(total_query, HTTP_QUERY.query.len()) &#123;</span><br><span class="line">        <span class="built_in">let</span> client = client.clone();</span><br><span class="line">        <span class="built_in">let</span> req = HTTP_QUERY.query[i].<span class="built_in">clone</span>(); // Ensure req can be moved into the async block</span><br><span class="line">        <span class="built_in">let</span> success_cost_clone = Arc::<span class="built_in">clone</span>(&amp;success_cost);</span><br><span class="line">        <span class="built_in">let</span> failed_cnt_clone = Arc::<span class="built_in">clone</span>(&amp;failed_cnt);</span><br><span class="line"></span><br><span class="line">        task::spawn(async move &#123;</span><br><span class="line">            <span class="built_in">let</span> begin_timestamp = chrono::Utc::now().timestamp_millis() as u64;</span><br><span class="line">            match req.send_request(Some(&amp;client)).await &#123;</span><br><span class="line">                Ok(_) =&gt; &#123;</span><br><span class="line">                    <span class="built_in">let</span> end_timestamp = chrono::Utc::now().timestamp_millis() as u64;</span><br><span class="line">                    <span class="built_in">let</span> mut success_cost = success_cost_clone.lock().unwrap();</span><br><span class="line">                    success_cost.push(end_timestamp - begin_timestamp);</span><br><span class="line">                    info!(<span class="string">&quot;OK. Response Cost: &#123;&#125; ms&quot;</span>, end_timestamp - begin_timestamp);</span><br><span class="line">                &#125;</span><br><span class="line">                Err(e) =&gt; &#123;</span><br><span class="line">                    <span class="built_in">let</span> end_timestamp = chrono::Utc::now().timestamp_millis() as u64;</span><br><span class="line">                    <span class="built_in">let</span> mut failed_cnt = failed_cnt_clone.lock().unwrap();</span><br><span class="line">                    *failed_cnt += 1;</span><br><span class="line">                    error!(<span class="string">&quot;Error sending request: &#123;&#125;. Cost: &#123;&#125; ms&quot;</span>, e, end_timestamp - begin_timestamp);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        interval.tick().await;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">let</span> success_cost = success_cost.lock().unwrap().<span class="built_in">clone</span>();</span><br><span class="line">    <span class="built_in">let</span> failed_cnt = failed_cnt.lock().unwrap().<span class="built_in">clone</span>();</span><br><span class="line">    (success_cost, failed_cnt)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h2><h3 id="编译"><a href="#编译" class="headerlink" title="编译"></a>编译</h3><p>项目用到openssl相关，可能需要下载openssl相关库，并设置OpenSSL相关库，这里以mac为为例。</p>
+<p><code>brew install openssl</code><br><code>rustup target add x86_64-unknown-linux-musl</code></p>
+<p><strong>编译命令</strong></p>
+<p>mac交叉编译到linux</p>
+<p><code>cargo zigbuild --target x86_64-unknown-linux-musl --release</code></p>
+<p>linux环境编译</p>
+<p><code>cargo build --release</code></p>
+<h3 id="使用-1"><a href="#使用-1" class="headerlink" title="使用"></a>使用</h3><p>命令如下</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">RUST_LOG=info ./http_benchmark_tool --mode qps  --http_file input.json --process_num 5 --total 5 --qps 5 --expire_secs 300</span><br></pre></td></tr></table></figure>
+
+<p>其中:</p>
+<ol>
+<li><code>RUST_LOG=info</code>代表开启日志打印</li>
+<li><code>--mode</code> 代表使用哪种模式</li>
+<li><code>--http_file</code> 代表传入的请求文件</li>
+<li><code>--process_num</code> process模式下进程数</li>
+<li><code>--qps</code> qps模式下每秒qps</li>
+<li><code>--total</code> 总共的请求数。</li>
+<li><code>--expire_secs</code> qps模式下，每个连接会维持的时间(秒)</li>
+</ol>
+<p>如果是process模式, 则每个进程会发送<code>total/process_num</code>个请求；<br>如果是qps模式,进程会持续<code>total</code>次发送, 每次发送后sleep <code>1/qps</code>秒；<br>http_file文件格式参考 2.1节 http请求文件定义</p>
+<p><strong>note</strong>: 本人只在linux环境测试和使用过，在其他环境使用如windows应该需要在编译时指定windows平台</p>
+<h2 id="项目地址"><a href="#项目地址" class="headerlink" title="项目地址"></a>项目地址</h2><p><a target="_blank" rel="noopener" href="https://github.com/Majiko-Z/http_benchmark_tool">github链接</a></p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -202,9 +337,15 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
-      
 
-      <time title="创建时间：2025-05-27 22:00:07 / 修改时间：23:30:52" itemprop="dateCreated datePublished" datetime="2025-05-27T22:00:07+08:00">2025-05-27</time>
+      <time title="创建时间：2025-05-27 22:00:07" itemprop="dateCreated datePublished" datetime="2025-05-27T22:00:07+08:00">2025-05-27</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2025-05-29 23:10:18" itemprop="dateModified" datetime="2025-05-29T23:10:18+08:00">2025-05-29</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
