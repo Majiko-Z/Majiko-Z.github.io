@@ -137,18 +137,18 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">4</span>
+          <span class="site-state-item-count">5</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
           <a href="/categories/">
-        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-count">4</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-count">6</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -165,6 +165,97 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2025/07/08/%E5%A4%9A%E6%9C%8D%E5%8A%A1%E7%BC%96%E6%8E%92%E6%89%93%E5%8C%85%E5%8F%91%E5%B8%83%E5%AE%9E%E8%B7%B5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="yaohui">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+      <meta itemprop="description" content="just a blog">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Hexo">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2025/07/08/%E5%A4%9A%E6%9C%8D%E5%8A%A1%E7%BC%96%E6%8E%92%E6%89%93%E5%8C%85%E5%8F%91%E5%B8%83%E5%AE%9E%E8%B7%B5/" class="post-title-link" itemprop="url">多服务编排打包发布实践</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2025-07-08 20:56:45 / 修改时间：21:00:11" itemprop="dateCreated datePublished" datetime="2025-07-08T20:56:45+08:00">2025-07-08</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%AE%9E%E8%B7%B5/" itemprop="url" rel="index"><span itemprop="name">实践</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="前言-需求"><a href="#前言-需求" class="headerlink" title="前言&#x2F;需求"></a>前言&#x2F;需求</h2><p>在CD服务打包时，一个整体服务中会包含多个子服务&#x2F;组件，通过自动化脚本将其自动编排，整合发布服务</p>
+<h2 id="关键内容"><a href="#关键内容" class="headerlink" title="关键内容"></a>关键内容</h2><p>使用docker compose的合并功能，将不同组件compose file合并，来完成compose file整合<br>参考: <a target="_blank" rel="noopener" href="https://docker.cadn.net.cn/manuals/compose_how-tos_multiple-compose-files_merge">https://docker.cadn.net.cn/manuals/compose_how-tos_multiple-compose-files_merge</a></p>
+<p><strong>示例</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker compose -f base.tml -f a/a.yml -f b/b.yml config &gt; docker-compose.yml</span><br></pre></td></tr></table></figure>
+
+<p>用base.yml来指定服务整体名称，否则服务整体名称会是a.yml中的内容</p>
+<h2 id="约定"><a href="#约定" class="headerlink" title="约定"></a>约定</h2><p>在打包服务时，一个常规的CI任务:<br>在某打包目录打包不同的组件，这些组件都是docker方式启动的，将其打包编排成一个服务整体</p>
+<p>可以设置一些约定:<br>1.服务启动方式统一: 各组件提供docker-compose-gen.yml文件<br>2.各组件映射目录统一: logs&#x2F;config&#x2F;data&#x2F;bin&#x2F;lib</p>
+<p><strong>期望</strong><br>将打包目录下的所有组件打包，包括配置&#x2F;映射&#x2F;镜像，并可以通过docker compose up -d直接启动所有服务</p>
+<h2 id="一个示例"><a href="#一个示例" class="headerlink" title="一个示例"></a>一个示例</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">set</span> -e</span><br><span class="line"></span><br><span class="line"><span class="comment"># 初始化变量</span></span><br><span class="line">target_dir=<span class="string">&quot;/d/i/r/target&quot;</span></span><br><span class="line">service_name=<span class="string">&quot;unknown&quot;</span></span><br><span class="line">service_dir=<span class="string">&quot;/d/i/r/<span class="variable">$service_name</span>&quot;</span></span><br><span class="line">dt=$(<span class="built_in">date</span> +%Y_%m_%d_%H_%M_%S)</span><br><span class="line">dist_dir=<span class="string">&quot;<span class="variable">$&#123;target_dir&#125;</span>/<span class="variable">$&#123;dt&#125;</span>&quot;</span></span><br><span class="line">version=<span class="string">&quot;<span class="variable">$dist_dir</span>/version.txt&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">mkdir</span> -p <span class="string">&quot;<span class="variable">$&#123;dist_dir&#125;</span>&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 合并 docker-compose 文件</span></span><br><span class="line">extras=<span class="string">&quot;&quot;</span></span><br><span class="line"><span class="keyword">for</span> d <span class="keyword">in</span> <span class="string">&quot;<span class="variable">$service_dir</span>&quot;</span>/*; <span class="keyword">do</span></span><br><span class="line">    <span class="keyword">if</span> [ -f <span class="string">&quot;<span class="variable">$d</span>/docker-compose-gen.yml&quot;</span> ]; <span class="keyword">then</span></span><br><span class="line">        extras=<span class="string">&quot;<span class="variable">$extras</span> -f <span class="variable">$d</span>/docker-compose-gen.yml&quot;</span></span><br><span class="line">    <span class="keyword">fi</span></span><br><span class="line"><span class="keyword">done</span></span><br><span class="line"></span><br><span class="line">docker compose -f <span class="string">&quot;base.yml&quot;</span> <span class="variable">$extras</span> config &gt; docker-compose.yml</span><br><span class="line"><span class="built_in">cp</span> docker-compose.yml <span class="string">&quot;<span class="variable">$dist_dir</span>/&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建目标结构</span></span><br><span class="line"><span class="built_in">mkdir</span> -p <span class="string">&quot;<span class="variable">$dist_dir</span>/bin&quot;</span> <span class="string">&quot;<span class="variable">$dist_dir</span>/lib&quot;</span> <span class="string">&quot;<span class="variable">$dist_dir</span>/config&quot;</span> <span class="string">&quot;<span class="variable">$dist_dir</span>/data&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 收集各模块内容</span></span><br><span class="line"><span class="keyword">for</span> d <span class="keyword">in</span> <span class="string">&quot;<span class="variable">$service_dir</span>&quot;</span>/*; <span class="keyword">do</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;收集 <span class="variable">$d</span> ...&quot;</span></span><br><span class="line">    part_dir=<span class="string">&quot;<span class="variable">$d</span>&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 拷贝 bin 目录</span></span><br><span class="line">    <span class="keyword">if</span> [ -d <span class="string">&quot;<span class="variable">$part_dir</span>/bin&quot;</span> ]; <span class="keyword">then</span></span><br><span class="line">        <span class="built_in">cp</span> -r <span class="string">&quot;<span class="variable">$part_dir</span>/bin&quot;</span> <span class="string">&quot;<span class="variable">$dist_dir</span>/bin/<span class="subst">$(basename $d)</span>&quot;</span></span><br><span class="line">    <span class="keyword">fi</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 拷贝 lib 目录</span></span><br><span class="line">    <span class="keyword">if</span> [ -d <span class="string">&quot;<span class="variable">$part_dir</span>/lib&quot;</span> ]; <span class="keyword">then</span></span><br><span class="line">        <span class="built_in">cp</span> -r <span class="string">&quot;<span class="variable">$part_dir</span>/lib&quot;</span> <span class="string">&quot;<span class="variable">$dist_dir</span>/lib/<span class="subst">$(basename $d)</span>&quot;</span></span><br><span class="line">    <span class="keyword">fi</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 拷贝 config 目录</span></span><br><span class="line">    <span class="keyword">if</span> [ -d <span class="string">&quot;<span class="variable">$part_dir</span>/config&quot;</span> ]; <span class="keyword">then</span></span><br><span class="line">        <span class="built_in">cp</span> -r <span class="string">&quot;<span class="variable">$part_dir</span>/config&quot;</span> <span class="string">&quot;<span class="variable">$dist_dir</span>/config/<span class="subst">$(basename $d)</span>&quot;</span></span><br><span class="line">    <span class="keyword">fi</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 拷贝 data 目录</span></span><br><span class="line">    <span class="keyword">if</span> [ -d <span class="string">&quot;<span class="variable">$part_dir</span>/data&quot;</span> ]; <span class="keyword">then</span></span><br><span class="line">        <span class="built_in">cp</span> -r <span class="string">&quot;<span class="variable">$part_dir</span>/data&quot;</span> <span class="string">&quot;<span class="variable">$dist_dir</span>/data/<span class="subst">$(basename $d)</span>&quot;</span></span><br><span class="line">    <span class="keyword">fi</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 提取版本信息</span></span><br><span class="line">    <span class="keyword">if</span> [ -f <span class="string">&quot;<span class="variable">$part_dir</span>/version.txt&quot;</span> ]; <span class="keyword">then</span></span><br><span class="line">        <span class="built_in">echo</span> <span class="string">&quot;########## <span class="subst">$(basename $d)</span> ############&quot;</span> &gt;&gt; <span class="string">&quot;<span class="variable">$version</span>&quot;</span></span><br><span class="line">        <span class="built_in">cat</span> <span class="string">&quot;<span class="variable">$part_dir</span>/version.txt&quot;</span> &gt;&gt; <span class="string">&quot;<span class="variable">$version</span>&quot;</span></span><br><span class="line">        <span class="built_in">echo</span> <span class="string">&quot;&quot;</span> &gt;&gt; <span class="string">&quot;<span class="variable">$version</span>&quot;</span></span><br><span class="line">    <span class="keyword">fi</span></span><br><span class="line"><span class="keyword">done</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 获取所有镜像</span></span><br><span class="line">images=$(grep image docker-compose.yml | awk <span class="string">&#x27;&#123; print $2 &#125;&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 检查镜像是否存在，并保存到发布目录</span></span><br><span class="line"><span class="keyword">for</span> img <span class="keyword">in</span> <span class="variable">$images</span>; <span class="keyword">do</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;检查 <span class="variable">$img</span> 是否存在 ...&quot;</span></span><br><span class="line">    docker inspect <span class="string">&quot;<span class="variable">$img</span>&quot;</span> &gt;/dev/null</span><br><span class="line"><span class="keyword">done</span></span><br><span class="line"></span><br><span class="line">docker save <span class="variable">$images</span> -o <span class="string">&quot;<span class="variable">$dist_dir</span>/docker-images.tar&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 新增：压缩整个发布目录</span></span><br><span class="line"><span class="built_in">cd</span> <span class="string">&quot;<span class="variable">$target_dir</span>&quot;</span> || <span class="built_in">exit</span></span><br><span class="line">tar -czf <span class="string">&quot;<span class="variable">$&#123;dt&#125;</span>.tar.gz&quot;</span> <span class="string">&quot;<span class="variable">$dt</span>&quot;</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;发布包已压缩为 <span class="variable">$&#123;dt&#125;</span>.tar.gz&quot;</span></span><br></pre></td></tr></table></figure>
+
+
+<h2 id="服务启动"><a href="#服务启动" class="headerlink" title="服务启动"></a>服务启动</h2><p>解压，导入镜像，修改配置，之后直接启动即可</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">tar -xvf service.tar.gz</span><br><span class="line">docker load -i docker-images</span><br><span class="line">docker compose up -d</span><br></pre></td></tr></table></figure>
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
