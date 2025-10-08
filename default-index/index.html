@@ -137,7 +137,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">5</span>
+          <span class="site-state-item-count">6</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -148,7 +148,7 @@
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-count">7</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -165,6 +165,94 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2025/10/08/windows-gitlab-ci%E7%94%A8%E6%88%B7%E5%90%AF%E5%8A%A8%E9%97%AE%E9%A2%98-%E8%A7%A3%E5%86%B3%E8%AE%B0%E5%BD%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="yaohui">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+      <meta itemprop="description" content="just a blog">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Hexo">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2025/10/08/windows-gitlab-ci%E7%94%A8%E6%88%B7%E5%90%AF%E5%8A%A8%E9%97%AE%E9%A2%98-%E8%A7%A3%E5%86%B3%E8%AE%B0%E5%BD%95/" class="post-title-link" itemprop="url">windows gitlab ci用户启动问题 解决记录</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2025-10-08 15:54:38 / 修改时间：16:13:12" itemprop="dateCreated datePublished" datetime="2025-10-08T15:54:38+08:00">2025-10-08</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>在公司遇到，某台windows堡垒机重启后，gitlab-runner无法用指定用户的运行问题</p>
+<h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p><code>cargo build</code>时报错，<code>git fetch</code> 相关的错误，该错误是git用户没有对应仓库的权限。<br>但是在pwsh手动执行build命令编译成功。</p>
+<p><img src="/../images/20251008-ci-err.png" alt="报错"></p>
+<h2 id="问题分析"><a href="#问题分析" class="headerlink" title="问题分析"></a>问题分析</h2><p>最直观的表明手动执行命令的git user和ci中的git user不是同一个。<br>在ci中加入调试信息，打印执行命令的用户，发现为管理员用户。而期望为ci_build用户。</p>
+<p><img src="/../images/20251008-user.png" alt="USER"></p>
+<p>1.尝试停止gitlab-runner任务，尝试使用ci_build用户拉起，报错权限不足;</p>
+<p><img src="/../images/20251008-ci_build_user.png" alt="尝试1"></p>
+<p>2.尝试给ci_build用户加管理员权限，再拉起runner, 仍然报错权限不足;</p>
+<p><img src="/../images/20251008-add-admin.png" alt="尝试2"></p>
+<p>3.尝试通过ci_build用户用gsudo使用管理员身份拉起runner,拉起后的用户不是ci_build; </p>
+<p><img src="/../images/20251008-gsudo.png" alt="尝试3"></p>
+<h2 id="问题解决"><a href="#问题解决" class="headerlink" title="问题解决"></a>问题解决</h2><p>1.使用管理员身份install和start gitlab-runner服务;<br>2.在windows系统任务中(cmd + taskschd.msc)，修改登录身份为ci_build用户;</p>
+<p>最终问题解决;</p>
+<p><img src="/../images/20251008-taskschd.png" alt="taskschd"></p>
+<p><img src="/../images/20251008-runner.png" alt="runner"></p>
+<p>检测通过;</p>
+<p><img src="/../images/20251008-ci-echo.png" alt="ci-echo"></p>
+<h2 id="说明"><a href="#说明" class="headerlink" title="说明"></a>说明</h2><p>问题原因为: windows管理员用户下的gitlab 账户和windows ci用户配置下的gitlab 账户不一致。</p>
+<p>由于gitlab-runner启动时会注册为定时任务,且定时任务需要管理员权限启动，因此默认启动时使用了管理员用户下的ci账户。而为了权限隔离，又创建了windows ci用户用于ci执行。通过间接修改命令执行用户来确保使用指定的windows用户。</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -301,7 +389,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2025-05-30 00:29:18" itemprop="dateModified" datetime="2025-05-30T00:29:18+08:00">2025-05-30</time>
+      <time title="修改时间：2025-07-08 21:07:59" itemprop="dateModified" datetime="2025-07-08T21:07:59+08:00">2025-07-08</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -351,7 +439,7 @@
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line">pub async fn send_request_by_qps(qps: u64) -&gt; (Vec&lt;u64&gt;, u64) &#123;</span><br><span class="line">    // Build a client with customized settings</span><br><span class="line">    <span class="built_in">let</span> expire_secs = EXPIRE_TIME_SEC.get().unwrap();</span><br><span class="line"></span><br><span class="line">    <span class="built_in">let</span> client = ClientBuilder::new()</span><br><span class="line">        .http2_adaptive_window(<span class="literal">true</span>) // Enable adaptive window <span class="keyword">for</span> HTTP/2</span><br><span class="line">        .pool_max_idle_per_host(500) // Allow up to 500 idle connections per host</span><br><span class="line">        .<span class="built_in">timeout</span>(Duration::from_secs(*expire_secs as u64)) // 连接超时时间</span><br><span class="line">        .build()</span><br><span class="line">        .expect(<span class="string">&quot;Failed to build client&quot;</span>); // [SAFE]</span><br><span class="line"></span><br><span class="line">    <span class="built_in">let</span> interval_duration = Duration::from_secs_f64(1.0 / qps as f64);</span><br><span class="line">    <span class="built_in">let</span> mut interval = interval(interval_duration); // qps interval</span><br><span class="line"></span><br><span class="line">    <span class="built_in">let</span> success_cost = Arc::new(Mutex::new(Vec::new()));</span><br><span class="line">    <span class="built_in">let</span> failed_cnt = Arc::new(Mutex::new(0));</span><br><span class="line"></span><br><span class="line">    <span class="built_in">let</span> total_query = *TOTAL_HTTP_NUM.get().unwrap() as usize;</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> 0..std::cmp::min(total_query, HTTP_QUERY.query.len()) &#123;</span><br><span class="line">        <span class="built_in">let</span> client = client.clone();</span><br><span class="line">        <span class="built_in">let</span> req = HTTP_QUERY.query[i].<span class="built_in">clone</span>(); // Ensure req can be moved into the async block</span><br><span class="line">        <span class="built_in">let</span> success_cost_clone = Arc::<span class="built_in">clone</span>(&amp;success_cost);</span><br><span class="line">        <span class="built_in">let</span> failed_cnt_clone = Arc::<span class="built_in">clone</span>(&amp;failed_cnt);</span><br><span class="line"></span><br><span class="line">        task::spawn(async move &#123;</span><br><span class="line">            <span class="built_in">let</span> begin_timestamp = chrono::Utc::now().timestamp_millis() as u64;</span><br><span class="line">            match req.send_request(Some(&amp;client)).await &#123;</span><br><span class="line">                Ok(_) =&gt; &#123;</span><br><span class="line">                    <span class="built_in">let</span> end_timestamp = chrono::Utc::now().timestamp_millis() as u64;</span><br><span class="line">                    <span class="built_in">let</span> mut success_cost = success_cost_clone.lock().unwrap();</span><br><span class="line">                    success_cost.push(end_timestamp - begin_timestamp);</span><br><span class="line">                    info!(<span class="string">&quot;OK. Response Cost: &#123;&#125; ms&quot;</span>, end_timestamp - begin_timestamp);</span><br><span class="line">                &#125;</span><br><span class="line">                Err(e) =&gt; &#123;</span><br><span class="line">                    <span class="built_in">let</span> end_timestamp = chrono::Utc::now().timestamp_millis() as u64;</span><br><span class="line">                    <span class="built_in">let</span> mut failed_cnt = failed_cnt_clone.lock().unwrap();</span><br><span class="line">                    *failed_cnt += 1;</span><br><span class="line">                    error!(<span class="string">&quot;Error sending request: &#123;&#125;. Cost: &#123;&#125; ms&quot;</span>, e, end_timestamp - begin_timestamp);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        interval.tick().await;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">let</span> success_cost = success_cost.lock().unwrap().<span class="built_in">clone</span>();</span><br><span class="line">    <span class="built_in">let</span> failed_cnt = failed_cnt.lock().unwrap().<span class="built_in">clone</span>();</span><br><span class="line">    (success_cost, failed_cnt)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 
-<h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h2><h3 id="编译"><a href="#编译" class="headerlink" title="编译"></a>编译</h3><p>项目用到openssl相关，可能需要下载openssl相关库，并设置OpenSSL相关库，这里以mac为为例。</p>
+<h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h2><h3 id="编译"><a href="#编译" class="headerlink" title="编译"></a>编译</h3><p>以mac为例</p>
 <p><code>brew install openssl</code><br><code>rustup target add x86_64-unknown-linux-musl</code></p>
 <p><strong>编译命令</strong></p>
 <p>mac交叉编译到linux</p>
